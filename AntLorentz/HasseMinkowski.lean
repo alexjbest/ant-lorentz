@@ -4,6 +4,14 @@ import Mathlib.LinearAlgebra.TensorProduct -- tensor products (for base change)
 import Mathlib.LinearAlgebra.Dimension -- rank of modules
 import Mathlib.NumberTheory.Padics.PadicNumbers
 
+namespace QuadraticForm
+
+variable [Semiring R] [AddCommMonoid M] [Module R M]
+
+abbrev Isotropic (Q : QuadraticForm R M) : Prop := ¬ Anisotropic (Q)
+
+end QuadraticForm
+
 /-!
 
 # Hasse-Minkowski experiments
@@ -57,15 +65,15 @@ variable [FiniteDimensional ℚ V]
 -- Let `F` be a quadratic form on V
 variable (F : QuadraticForm ℚ V)
 
-/-- A quadratic form over ℚ is everywhere locally anisotropic if it has nontrivial
+/-- A quadratic form over ℚ is everywhere locally isotropic if it has nontrivial
 p-adic points for all p, and real points. -/
-def QuadraticForm.LocallySoluble :=
-  (∀ (p : ℕ) [Fact (p.Prime)], ¬ (F.baseChange ℚ V ℚ_[p]).Anisotropic) ∧
-  ¬ (F.baseChange ℚ V ℝ).Anisotropic
+def QuadraticForm.EverywhereLocallyIsotropic :=
+  (∀ (p : ℕ) [Fact (p.Prime)], (F.baseChange ℚ V ℚ_[p]).Isotropic) ∧
+  (F.baseChange ℚ V ℝ).Isotropic
 
 /-- The *statement* of the Hasse-Minkowski theorem. -/
 def Hasse_Minkowski (F : QuadraticForm ℚ V) : Prop :=
-  ¬ F.Anisotropic ↔ ¬ F.LocallySoluble
+  F.Isotropic ↔ F.EverywhereLocallyIsotropic
 
 -- a nontrivial project (probably publishable if someone does it)
 theorem Hasse_Minkowski_proof : ∀ (F : QuadraticForm ℚ V), Hasse_Minkowski F := sorry
@@ -74,13 +82,15 @@ theorem Hasse_Minkowski_proof : ∀ (F : QuadraticForm ℚ V), Hasse_Minkowski F
 
 -- (0) dim(V)=0 case
 
-variable (k : Type) [Field k]
+variable (k W : Type) [Field k] [AddCommMonoid W]
 
-theorem quadform_zero_dim_eq_zero (W : Module k) (Q : QuadraticForm k W) (h : Module.rank W = 0) : Q = 0 := by sorry
+theorem quadform_zero_dim_eq_zero [Module k W] (Q : QuadraticForm k W) (h : Module.rank W = 0) : Q = 0 := by sorry
 
 theorem Hasse_Minkowski0 (hV : Module.rank V = 0) :
     ∀ (F : QuadraticForm ℚ V), Hasse_Minkowski F := by
-    rank_zero_iff_forall_zero -- says that every element in a rank 0 module is 0
+    sorry
+    -- idea: no non-zero elements of V:
+    -- rank_zero_iff_forall_zero -- says that every element in a rank 0 module is 0
 --------------------------------------------------------------------
 
 
