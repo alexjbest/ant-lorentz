@@ -18,6 +18,26 @@ end QuadraticForm
 
 Mathematical experiments around the local-global principle.
 
+
+Thoughts:
+- Proof splits into several cases 0, 1, 2, 3, 4, ≥ 5, should do this separately
+- also should prove the obvious direction first!
+- Should decide what generality, probably just Q at first, but maybe think of other number fields / function 
+  fields where possible.
+- there are many proofs out there, https://mathoverflow.net/questions/384352/a-list-of-proofs-of-the-hasse-minkowski-theorem
+  has a summary
+- need fact that any quadratic form is diagonalizable, this is more or less in mathlib
+- Kevin recommends cours d'arithmetique, looks nice
+- many proofs use dirichlets theorem on primes in arithmetic progressions, this is not in mathlib but has been formalized before
+  (at least by Carneiro pssibly others)
+- Cassels - NOTE ON QUADRATIC FORMS OVER THE RATIONAL FIELD
+  claims only hard case is 4, others do not require deep results
+  and that the n = 4 case can be done with minkowski's convex body theorem, this is in mathlib
+  he also uses "Gauss's theorem on the existence of forms in genera"
+- n = 0 and 1 cases should be "trivial"
+- n = 2 needs that a number is a global square iff it is an everywhre local square
+- n = 3 case works by diagonalizing and maybe some QR / modular stuff
+- https://etd.ohiolink.edu/apexprod/rws_etd/send_file/send?accession=osu1338317481&disposition=inline seems an ok reference for 2,3
 -/
 
 section base_change
