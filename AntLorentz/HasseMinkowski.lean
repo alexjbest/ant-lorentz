@@ -110,3 +110,4 @@ theorem Hasse_Minkowski2 (hV : Module.rank V = 2) :
 
 -- All of these should be possible, although you'll quickly learn that formalisation of
 -- mathematics is more annoying than you might think...
+-- testing a push
