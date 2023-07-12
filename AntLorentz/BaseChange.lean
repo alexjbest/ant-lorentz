@@ -21,7 +21,6 @@ section base_change
 
 variable [CommSemiring R] [AddCommMonoid M] [Module R M] [CommSemiring A] [Algebra R A]
 
-open TensorProduct -- for notation
 open QuadraticForm
 
 -- Let's be lazy and assume 1/2 ∈ R
@@ -39,6 +38,7 @@ variable (R A M N T : Type) [CommRing R] [CommRing A] [Algebra R A]
   -- and I want to regard T as an R-module too, in the obvious way
   [Module R T] [IsScalarTower R A T]
 
+open TensorProduct -- for notation
 
 def LinearMap.baseChangeLeft (f : M →ₗ[R] T) : A ⊗[R] M →ₗ[A] T where
   toFun := TensorProduct.lift ({
@@ -60,6 +60,8 @@ def TensorProduct.rid' : A ⊗[R] R ≃ₗ[A] A where
   left_inv := sorry
   right_inv := sorry
 
+variable {R M}
+
 def BilinForm.baseChange (F : BilinForm R M) : BilinForm A (A ⊗[R] M) := by
   let L := BilinForm.toLinHom R F
   let L' := L.baseChange A
@@ -73,7 +75,22 @@ def BilinForm.baseChange (F : BilinForm R M) : BilinForm A (A ⊗[R] M) := by
 
 def QuadraticForm.baseChange [Invertible (2 : R)] (F : QuadraticForm R M) : QuadraticForm A (A ⊗[R] M) := by
   let B : BilinForm R M := associatedHom R F
-  let B' : BilinForm A (A ⊗[R] M) := B.baseChange R A M
+  let B' : BilinForm A (A ⊗[R] M) := B.baseChange A
   exact B'.toQuadraticForm
 
-  
+lemma BilinForm.baseChange_eval (F : BilinForm R M) (a b : A) (m n : M) :
+    F.baseChange A (a ⊗ₜ m) (b ⊗ₜ n) = a * b * algebraMap R A (F m n) := by
+  unfold baseChange
+  dsimp
+  unfold bilin
+  dsimp
+  sorry
+
+/-- If F_A is the base change of the quadratic form F to A, then F_A(a ⊗ m) = a^2*F(m). -/
+lemma QuadraticForm.baseChange_eval (F : QuadraticForm R M) (m : M) [Invertible (2 : R)] :
+  F.baseChange A (a ⊗ₜ m) = a * a * algebraMap R A (F m) := by
+  rw [baseChange, BilinForm.toQuadraticForm_apply, BilinForm.baseChange_eval, associated_apply,
+      ← two_smul R m, QuadraticForm.map_smul]
+  congr
+  rw [mul_assoc, invOf_mul_eq_iff_eq_mul_left]
+  ring
