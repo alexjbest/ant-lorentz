@@ -3,13 +3,13 @@ import Mathlib.LinearAlgebra.QuadraticForm.Basic -- quadratic forms
 import Mathlib.LinearAlgebra.TensorProduct -- tensor products (for base change)
 import Mathlib.LinearAlgebra.Dimension -- rank of modules
 import Mathlib.NumberTheory.Padics.PadicNumbers
+import AntLorentz.BaseChange
 
-namespace QuadraticForm
 
 variable [Semiring R] [AddCommMonoid M] [Module R M]
 
+namespace QuadraticForm
 abbrev Isotropic (Q : QuadraticForm R M) : Prop := ¬ Anisotropic (Q)
-
 end QuadraticForm
 
 /-!
@@ -20,41 +20,12 @@ Mathematical experiments around the local-global principle.
 
 -/
 
-section base_change
-
-/-
-
-## Base extension of quadratic forms
-
-Unfortunately we don't seem to have this in the library, so we have
-to develop it ourselves including making all the basic results which we'll need.
-Note that we also make the theory in maximal generality (for example
-we use semirings instead of rings, so the theory works for quadratic
-forms over the naturals)
-
--/
-
--- Let `M` be an `R`-module
-variable (R : Type) (M : Type) [CommRing R] [AddCommGroup M] [Module R M]
-
--- Let `A` be an `R`-algebra
-variable (A : Type) [Semiring A] [Algebra R A]
 
 open TensorProduct -- this line gives us access to ⊗ notation
 
 -- Let's be lazy and assume 1/2 ∈ R
 variable [Invertible (2 : R)]
 
-def BilinForm.baseChange (F : BilinForm R M) : BilinForm A (A ⊗[R] M) :=
-  --let L := BilinForm.toLinHom
-  sorry
-
-/-- If `F : QuadraticForm R M` and `A` is an `R`-algebra then `F.baseChange A`
-is the associated quadratic form on `M ⊗[R] A` -/
-def QuadraticForm.baseChange (F : QuadraticForm R M) : QuadraticForm A (A ⊗[R] M) := by
-  let B : BilinForm R M := associatedHom R F
-  let B' : BilinForm A (A ⊗[R] M) := B.baseChange R M A -- base change
-  exact B'.toQuadraticForm
 
 -- Let V be a ℚ-vector space
 variable {V : Type} [AddCommGroup V] [Module ℚ V]
@@ -68,8 +39,8 @@ variable (F : QuadraticForm ℚ V)
 /-- A quadratic form over ℚ is everywhere locally isotropic if it has nontrivial
 p-adic points for all p, and real points. -/
 def QuadraticForm.EverywhereLocallyIsotropic :=
-  (∀ (p : ℕ) [Fact (p.Prime)], (F.baseChange ℚ V ℚ_[p]).Isotropic) ∧
-  (F.baseChange ℚ V ℝ).Isotropic
+  (∀ (p : ℕ) [Fact (p.Prime)], (F.baseChange ℚ ℚ_[p] V).Isotropic) ∧
+  (F.baseChange ℚ ℝ V).Isotropic
 
 /-- The *statement* of the Hasse-Minkowski theorem. -/
 def Hasse_Minkowski (F : QuadraticForm ℚ V) : Prop :=
