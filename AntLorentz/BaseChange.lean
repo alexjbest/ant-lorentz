@@ -106,3 +106,18 @@ lemma QuadraticForm.baseChange_eval (F : QuadraticForm R M) (m : M) [Invertible 
   congr
   rw [mul_assoc, invOf_mul_eq_iff_eq_mul_left]
   ring
+
+end base_change
+
+variable [Field k] [AddCommGroup M] [Module k M] [Ring A] [Algebra k A] [Module A M] [IsScalarTower k A M] 
+[StrongRankCondition A] [Module.Free k M] [Module.Free A M] [Module.Free k A]
+
+open TensorProduct -- for notation
+
+lemma base_change_module_rank_preserved : Module.rank k M = Module.rank A (A ⊗[k] M) := by 
+  --have : Module.Free A (A ⊗[k] M) := by sorry
+  --have := lift_rank_mul_lift_rank k A (A ⊗[k] M) 
+  --rw [rank_tensorProduct] at this
+  sorry -- not done yet, statement should be correct with the assumtions now 
+
+
