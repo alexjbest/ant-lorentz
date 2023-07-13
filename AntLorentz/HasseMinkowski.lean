@@ -6,7 +6,7 @@ import Mathlib.NumberTheory.Padics.PadicNumbers
 import AntLorentz.BaseChange
 
 
-variable [Semiring R] [AddCommMonoid M] [Module R M]
+variable [CommSemiring R] [AddCommMonoid M] [Module R M] [CommSemiring A] [Algebra R A]
 
 namespace QuadraticForm
 abbrev Isotropic (Q : QuadraticForm R M) : Prop := ¬ Anisotropic (Q)
@@ -46,7 +46,7 @@ open TensorProduct -- this line gives us access to ⊗ notation
 -- Let's be lazy and assume 1/2 ∈ R
 variable [Invertible (2 : R)]
 
-<
+
 -- temporary NOT CORRECT YET
 lemma base_change_module_rank_preserved : Module.rank R M = Module.rank A (A ⊗[R] M) :=by sorry
 
