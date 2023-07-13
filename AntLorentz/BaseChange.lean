@@ -43,11 +43,17 @@ open TensorProduct -- for notation
 def LinearMap.baseChangeLeft (f : M →ₗ[R] T) : A ⊗[R] M →ₗ[A] T where
   toFun := TensorProduct.lift ({
     toFun := fun a ↦ a • f
-    map_add' := sorry
-    map_smul' := sorry
+    map_add' := fun x y => add_smul x y f
+    map_smul' := by
+      intro r x
+      simp only [smul_assoc, RingHom.id_apply]
   } : A →ₗ[R] M →ₗ[R] T)
-  map_add' := sorry
-  map_smul' := sorry
+  map_add' := map_add _
+  map_smul' := by
+    intro r x
+    simp only [RingHom.id_apply]
+    --show (r • x) • f =  _
+    sorry
 
 def algebraMap' : R →ₗ[R] A where
   toFun := algebraMap R A
@@ -62,6 +68,10 @@ def TensorProduct.rid' : A ⊗[R] R ≃ₗ[A] A where
 
 variable {R M}
 
+def boop : A →ₗ[A] R →ₗ[R] A :=
+  LinearMap.mk₂' A R (fun a r => r • a) (fun m₁ m₂ n => smul_add n m₁ m₂) (fun c m n => smul_comm n c m)
+  (fun m n₁ n₂ => add_smul n₁ n₂ m) (fun c m n => smul_assoc c n m)
+
 def BilinForm.baseChange (F : BilinForm R M) : BilinForm A (A ⊗[R] M) := by
   let L := BilinForm.toLinHom R F
   let L' := L.baseChange A
@@ -71,7 +81,9 @@ def BilinForm.baseChange (F : BilinForm R M) : BilinForm A (A ⊗[R] M) := by
   refine LinearMap.comp ?_ (LinearMap.baseChangeHom R A _ _)
   apply LinearMap.restrictScalars R (S := A)
   refine LinearMap.llcomp A _ _ _ (?_ : A ⊗[R] R →ₗ[A] A)
-  exact (TensorProduct.rid' R A).toLinearMap
+  apply TensorProduct.AlgebraTensorModule.lift
+  exact boop _
+  --exact (TensorProduct.rid' R A).toLinearMap
 
 def QuadraticForm.baseChange [Invertible (2 : R)] (F : QuadraticForm R M) : QuadraticForm A (A ⊗[R] M) := by
   let B : BilinForm R M := associatedHom R F
