@@ -64,8 +64,8 @@ variable (F : QuadraticForm ℚ V)
 /-- A quadratic form over ℚ is everywhere locally isotropic if it has nontrivial
 p-adic points for all p, and real points. -/
 def QuadraticForm.EverywhereLocallyIsotropic :=
-  (∀ (p : ℕ) [Fact (p.Prime)], (F.baseChange ℚ ℚ_[p] V).Isotropic) ∧
-  (F.baseChange ℚ ℝ V).Isotropic
+  (∀ (p : ℕ) [Fact (p.Prime)], (F.baseChange ℚ_[p]).Isotropic) ∧
+  (F.baseChange ℝ).Isotropic
 
 /-- The *statement* of the Hasse-Minkowski theorem. -/
 def Hasse_Minkowski (F : QuadraticForm ℚ V) : Prop :=
