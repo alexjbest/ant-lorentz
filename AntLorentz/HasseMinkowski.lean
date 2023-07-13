@@ -86,7 +86,7 @@ def QuadraticForm.EverywhereLocallyIsotropic :=
 def QuadraticForm.Hasse_Minkowski (F : QuadraticForm ℚ V) : Prop :=
   F.Isotropic ↔ F.EverywhereLocallyIsotropic
 
-open QuadraticForm
+namespace QuadraticForm
 
 -- a nontrivial project (probably publishable if someone does it)
 theorem Hasse_Minkowski_proof : ∀ (F : QuadraticForm ℚ V), F.Hasse_Minkowski := sorry
@@ -145,6 +145,10 @@ lemma HM_of_Equivalent {Q S : QuadraticForm ℚ V} (h : Q.Equivalent S) :
 
 
 -- (2) dim(V)=2 case
+
+lemma rat_sq_iff_local_sq (x : ℚ) : IsSquare x ↔ (∀ (p : ℕ) [Fact (p.Prime)], IsSquare (x : ℚ_[p])) ∧ IsSquare (x : ℝ) := by
+  sorry 
+
 theorem Hasse_Minkowski2 (hV : Module.rank V = 2) :
     ∀ (F : QuadraticForm ℚ V), Hasse_Minkowski F := sorry
 
