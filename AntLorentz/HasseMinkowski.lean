@@ -4,6 +4,7 @@ import Mathlib.LinearAlgebra.TensorProduct -- tensor products (for base change)
 import Mathlib.LinearAlgebra.Dimension -- rank of modules
 import Mathlib.NumberTheory.Padics.PadicNumbers
 import AntLorentz.Diagonalize
+import AntLorentz.BaseChange
 
 namespace QuadraticForm
 
@@ -66,17 +67,6 @@ open TensorProduct -- this line gives us access to ⊗ notation
 -- Let's be lazy and assume 1/2 ∈ R
 variable [Invertible (2 : R)]
 
-def BilinForm.baseChange (F : BilinForm R M) : BilinForm A (A ⊗[R] M) :=
-  --let L := BilinForm.toLinHom
-  sorry
-
-/-- If `F : QuadraticForm R M` and `A` is an `R`-algebra then `F.baseChange A`
-is the associated quadratic form on `M ⊗[R] A` -/
-def QuadraticForm.baseChange (F : QuadraticForm R M) : QuadraticForm A (A ⊗[R] M) := by
-  let B : BilinForm R M := associatedHom R F
-  let B' : BilinForm A (A ⊗[R] M) := B.baseChange A -- base change
-  exact B'.toQuadraticForm
-
 def ten {R A M N} [CommRing R] [Ring A] [Algebra R A] [AddCommMonoid M] [AddCommMonoid N]
   [Module R M] [Module A M]
   [Module R N] [Module A N]
@@ -118,7 +108,7 @@ def LinearEquiv.baseChange {R A M N} [CommRing R] [Ring A] [Algebra R A] [AddCom
 
 
 lemma QuadraticForm.baseChange.Equivalent
-  (A : Type _) [Ring A] [Algebra R A]
+  (A : Type _) [CommRing A] [Algebra R A]
   (Q S : QuadraticForm R M) (h : Q.Equivalent S) :
     (baseChange A Q).Equivalent (baseChange A S) := by
   cases' h with val
@@ -128,8 +118,6 @@ lemma QuadraticForm.baseChange.Equivalent
   simp
   -- rw? -- TODO timeout whnf very quickly
   sorry
-
-  
 
 -- Let V be a ℚ-vector space
 variable {V : Type} [AddCommGroup V] [Module ℚ V]
@@ -157,35 +145,48 @@ theorem Hasse_Minkowski_proof : ∀ (F : QuadraticForm ℚ V), F.Hasse_Minkowski
 
 -- some easier problems
 
+variable (k W : Type) [Field k] [AddCommGroup W]
+
+lemma Isotropic_of_zero_quadForm_dim_ge1 [Module k W] (Q : QuadraticForm k W) (h₁ : Q=0) 
+(h2 : Module.rank k W ≠ 0) : Q.Isotropic := sorry
+
 -- (0) dim(V)=0 case
 
-variable (k W : Type) [Field k] [AddCommMonoid W]
+lemma anisotropic_of_quadForm_dim_zero [Module k W] (Q : QuadraticForm k W) 
+(h : Module.rank k W = 0) : Q.Anisotropic := by
+   intro (w : W)
+   intro 
+   rw [rank_zero_iff_forall_zero] at h
+   exact h w
 
-theorem quadform_zero_dim_eq_zero [Module k W] (Q : QuadraticForm k W) (h : Module.rank W = 0) : Q = 0 := by sorry
-
-theorem Hasse_Minkowski0 (hV : Module.rank V = 0) :
-    ∀ (F : QuadraticForm ℚ V), Hasse_Minkowski F := by
-    sorry
-    -- idea: no non-zero elements of V:
-    -- rank_zero_iff_forall_zero -- says that every element in a rank 0 module is 0
---------------------------------------------------------------------
-
-
-
-
+theorem Hasse_Minkowski0 (hV : Module.rank ℚ V = 0) : ∀ (F : QuadraticForm ℚ V), Hasse_Minkowski F := by
+   intro F
+   rw [Hasse_Minkowski]
+   constructor 
+   · contrapose
+     intro 
+     rw [QuadraticForm.Isotropic]
+     simp
+     apply anisotropic_of_quadForm_dim_zero _ _ F hV
+   · contrapose
+     intro 
+     rw [QuadraticForm.EverywhereLocallyIsotropic]
+     push_neg
+     intro 
+     simp 
+     apply anisotropic_of_quadForm_dim_zero
+     rw [← base_change_module_rank_preserved, hV] 
 
 
 -- (1) dim(V)=1 case
+
+lemma anisotropic_of_nonzero_quadForm_dim_1 [Module k W] (Q : QuadraticForm k W) 
+(h₁ : Q ≠ 0) (h₂ : Module.rank k W = 1) : Q.Anisotropic := sorry
+
 theorem Hasse_Minkowski1 (hV : Module.rank V = 1) :
     ∀ (F : QuadraticForm ℚ V), Hasse_Minkowski F := sorry
 
 
-
-/--
-⊗
-
-
--/
 lemma HM_of_Equivalent {Q S : QuadraticForm ℚ V} (h : Q.Equivalent S) :
     Q.Hasse_Minkowski ↔ S.Hasse_Minkowski := by
   simp only [Hasse_Minkowski, Isotropic, EverywhereLocallyIsotropic] at *
@@ -198,7 +199,4 @@ lemma HM_of_Equivalent {Q S : QuadraticForm ℚ V} (h : Q.Equivalent S) :
 theorem Hasse_Minkowski2 (hV : Module.rank V = 2) :
     ∀ (F : QuadraticForm ℚ V), Hasse_Minkowski F := sorry
 
--- All of these should be possible, although you'll quickly learn that formalisation of
--- mathematics is more annoying than you might think...
--- testing a push
 #lint
