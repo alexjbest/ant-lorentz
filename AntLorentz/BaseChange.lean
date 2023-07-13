@@ -55,10 +55,10 @@ def LinearMap.baseChangeLeft (f : M →ₗ[R] T) : A ⊗[R] M →ₗ[A] T where
     --show (r • x) • f =  _
     sorry
 
-def algebraMap' : R →ₗ[R] A where
+abbrev algebraMap' : R →ₗ[R] A where
   toFun := algebraMap R A
-  map_add' := sorry
-  map_smul' := sorry
+  map_add' := by intros; simp
+  map_smul' := by intros; simp [Algebra.smul_def]
 
 def TensorProduct.rid' : A ⊗[R] R ≃ₗ[A] A where
   toLinearMap := LinearMap.baseChangeLeft R A R A (algebraMap' R A)
