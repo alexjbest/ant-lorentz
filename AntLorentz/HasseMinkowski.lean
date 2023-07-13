@@ -4,6 +4,7 @@ import Mathlib.LinearAlgebra.TensorProduct -- tensor products (for base change)
 import Mathlib.LinearAlgebra.Dimension -- rank of modules
 import Mathlib.NumberTheory.Padics.PadicNumbers
 import AntLorentz.Diagonalize
+import AntLorentz.BaseChange
 
 namespace QuadraticForm
 
@@ -92,12 +93,15 @@ theorem Hasse_Minkowski_proof : ∀ (F : QuadraticForm ℚ V), F.Hasse_Minkowski
 
 -- some easier problems
 
--- (0) dim(V)=0 case
-
 variable (k W : Type) [Field k] [AddCommGroup W]
 
+lemma Isotropic_of_zero_quadForm_dim_ge1 : [Module k W] (Q : QuadraticForm k W) (h₁ : Q=0) 
+(h2 : Module.rank k W ≠ 0) : Q.Isotropic := sorry
 
-lemma anisotropic_of_quadform_dim_zero [Module k W] (Q : QuadraticForm k W) (h : Module.rank k W = 0) : Q.Anisotropic := by
+-- (0) dim(V)=0 case
+
+lemma anisotropic_of_quadForm_dim_zero [Module k W] (Q : QuadraticForm k W) 
+(h : Module.rank k W = 0) : Q.Anisotropic := by
    intro (w : W)
    intro 
    rw [rank_zero_iff_forall_zero] at h
@@ -121,9 +125,13 @@ theorem Hasse_Minkowski0 (hV : Module.rank ℚ V = 0) : ∀ (F : QuadraticForm �
      simp 
      apply anisotropic_of_quadform_dim_zero
      rw [← base_change_module_rank_preserved, hV] 
-   
-    
+
+
 -- (1) dim(V)=1 case
+
+lemma anisotropic_of_nonzero_quadForm_dim_1 : [Module k W] (Q : QuadraticForm k W) 
+(h₁ : Q ≠ 0) (h₂ : Module.rank k W = 1) : Q.Anisotropic := sorry
+
 theorem Hasse_Minkowski1 (hV : Module.rank V = 1) :
     ∀ (F : QuadraticForm ℚ V), Hasse_Minkowski F := sorry
 
