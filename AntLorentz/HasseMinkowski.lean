@@ -46,12 +46,6 @@ open TensorProduct -- this line gives us access to ⊗ notation
 -- Let's be lazy and assume 1/2 ∈ R
 variable [Invertible (2 : R)]
 
-
--- temporary NOT CORRECT YET
-lemma base_change_module_rank_preserved : Module.rank R M = Module.rank A (A ⊗[R] M) :=by sorry
-
-
-
 -- Let V be a ℚ-vector space
 variable {V : Type} [AddCommGroup V] [Module ℚ V]
 
@@ -80,6 +74,7 @@ theorem Hasse_Minkowski_proof : ∀ (F : QuadraticForm ℚ V), Hasse_Minkowski F
 
 variable (k W : Type) [Field k] [AddCommGroup W]
 
+
 lemma anisotropic_of_quadform_dim_zero [Module k W] (Q : QuadraticForm k W) (h : Module.rank k W = 0) : Q.Anisotropic := by
    intro (w : W)
    intro 
@@ -104,18 +99,8 @@ theorem Hasse_Minkowski0 (hV : Module.rank ℚ V = 0) : ∀ (F : QuadraticForm �
      simp 
      apply anisotropic_of_quadform_dim_zero
      rw [← base_change_module_rank_preserved, hV] 
-
-lemma zero_of_quadform_dim_zero [Module k W] (Q : QuadraticForm k W) (h : Module.rank W = 0) : Q = 0 := by sorry
-  -- rank_zero_iff_forall_zero 
-
-
    
     
-
-
-
-
-
 -- (1) dim(V)=1 case
 theorem Hasse_Minkowski1 (hV : Module.rank V = 1) :
     ∀ (F : QuadraticForm ℚ V), Hasse_Minkowski F := sorry
