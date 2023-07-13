@@ -192,7 +192,8 @@ lemma HM_of_Equivalent {Q S : QuadraticForm ℚ V} (h : Q.Equivalent S) :
   simp only [Hasse_Minkowski, Isotropic, EverywhereLocallyIsotropic] at *
   simp [anisotropic_iff _ _ h]
   rw [anisotropic_iff _ _ (baseChange.Equivalent ℝ _ _ h)]
-  simp_rw [anisotropic_iff _ _ (baseChange.Equivalent ℚ_[_] _ _ h)]
+  conv in (Anisotropic (baseChange _ Q)) =>
+    rw [anisotropic_iff _ _ (baseChange.Equivalent (R := ℚ) ℚ_[p] _ _ h)]
 
 
 -- (2) dim(V)=2 case
