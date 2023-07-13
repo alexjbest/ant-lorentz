@@ -148,7 +148,16 @@ theorem Hasse_Minkowski_proof : ∀ (F : QuadraticForm ℚ V), F.Hasse_Minkowski
 variable (k W : Type) [Field k] [AddCommGroup W]
 
 lemma Isotropic_of_zero_quadForm_dim_ge1 [Module k W] (Q : QuadraticForm k W) (h₁ : Q=0) 
-(h2 : Module.rank k W ≠ 0) : Q.Isotropic := sorry
+(h₂ : Module.rank k W ≠ 0) : Q.Isotropic := by
+  rw [QuadraticForm.Isotropic]
+  rw [QuadraticForm.Anisotropic]
+  have h: ∃ (w : W), w ≠ 0 := by
+    simpa [rank_zero_iff_forall_zero] using h₂
+  obtain ⟨w, hw⟩ := h 
+  have : Q w = 0 := by 
+    rw [h₁]
+    simp
+  tauto
 
 -- (0) dim(V)=0 case
 
