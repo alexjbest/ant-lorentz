@@ -1,5 +1,16 @@
 import Mathlib.Tactic -- tactics
 import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure -- algebraic closures
+import Lean
+open Lean Elab Tactic
+
+elab "tada" : tactic => do
+  let gs ← getUnsolvedGoals
+  if gs.isEmpty then
+    logInfo "Goals accomplished 🎉"
+  else
+    Term.reportUnsolvedGoals gs
+    throwAbortTactic
+
 
 
 /-!
@@ -9,7 +20,6 @@ import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure -- algebraic closures
 Thoughts about the definition of the cyclotomic character.
 
 -/
-
 -- let `L` be a field
 variable (L : Type) [Field L]
 
@@ -89,6 +99,8 @@ instance : Finite (Torsion L n) := by
   convert Set.finite_mem_finset x
   simp [Torsion]
 
+noncomputable instance: Fintype (Torsion L n):= Fintype.ofFinite _
+
 
 instance Torsion.isCyclic : IsCyclic (Torsion L n) :=
   isCyclic_of_subgroup_isDomain (Submonoid.subtype (Torsion L n)) ( by
@@ -165,22 +177,89 @@ theorem ModularCyclotomicCharacter_spec (g : L ≃+* L) (n : ℕ+) :
   aesop
   done
 
+  -- During the writing of the proof of this lemma, I realised that `Fintype G` seems to
+-- be the way to state that `G` is finite in the statements of lemmas, so I changed
+-- the statement of the lemma.
+lemma ModularCyclotomicCharacter.ext {G : Type _} [Group G] [Fintype G] [IsCyclic G]
+    (n : ℕ+) (a b : ZMod n) (hGcard : Fintype.card G = n) (h : ∀ t : G, t^a.val = t^b.val) :
+  a = b := by
+  -- G is cyclic so get an element g and a proof hg that G=<g>
+  obtain ⟨g, hg⟩ := IsCyclic.exists_generator (α := G)
+  -- Deduce `hgord`, the fact that order of g is |G|. This deduction is already in the
+  -- library as `orderOf_eq_card_of_forall_mem_zpowers` (guess the statement from the name!)
+  -- Remark: I found this lemma by opening the file where `IsCyclic` is defined, and then
+  -- just reading through the *statements* of the lemmas until I found the useful one.
+  have hgord := orderOf_eq_card_of_forall_mem_zpowers hg
+  -- use hypothesis `h` on this `g`
+  specialize h g
+  -- our hypothesis is now `g^A=g^B` for some naturals A and B (the `val`s of `a` and `b`),
+  -- and we know the
+  -- order of g is n, so we want to deduce something like A-B is a multiple of n.
+  -- But natural subtraction is a weird function (it gives the wrong answer if B>A)
+  -- so that's not the function we want to use as we'll lose information.
+  -- Looking through lemmas that start with `pow_eq_pow` using the Esc, ctrl-space trick
+  -- which I showed you today, we find this:
+  rw [pow_eq_pow_iff_modEq] at h
+  -- So now `h says A≡B [MOD orderOf g]` and we're trying to get into `ZMod n`
+  -- so we're going to need that `orderOf G = n` so we may as well fix this now
+  rw [hgord, hGcard] at h -- `h : ZMod.val a ≡ ZMod.val b [MOD n]`
+  -- The plan is now :
+  -- (1) `A≡B [MOD n]` implies `(A : ZMod n) = (B : ZMod n)`
+  -- and (2) `(↑A : ZMod n)=a` (lift then reduce and you're back where you started)
+
+  -- Solve (1) like this. The output tells you the relevant lemma.
+  -- `have h2 : ((ZMod.val a) : ZMod n) = ((ZMod.val b) : ZMod n) := by exact?`
+  rw [← ZMod.nat_cast_eq_nat_cast_iff] at h
+  -- Solve (2) with `have foo : ((ZMod.val a) : ZMod n) = a := by simp?`. Again
+  -- the output tells you the relevant lemmas
+  simpa [ZMod.nat_cast_val, ZMod.cast_id'] using h
+  done
+
+
 -- need to prove it is monoid homomorphism
 
-  -- lemma have_nth_roots_of_unity
+lemma ModularCyclotomicCharacter_id (hGcard : Fintype.card (Torsion L n) = n): ModularCyclotomicCharacter (RingEquiv.refl L) (n)=1 := by
+  sorry
+-- -- needs hGcarc
+-- show we get a map to (Z/nZ)^*
 
--- lemma ModularCyclotomicCharacter_id: ModularCyclotomicCharacter (RingEquiv.refl) (n)
--- -- error !!!!!!
+lemma coe_pow (a : Torsion L n) (b : ℕ) : (a : L)^b = ((a^b : Torsion L n) : L) := by exact rfl
+
+lemma coe_mul (n m : ℕ) (a b : ZMod n) (h : m ∣ n) : ((a * b : ZMod n) : ZMod m) = (a : ZMod m) * (b : ZMod m) := by
+    apply ZMod.cast_mul h a b
 
 
 
+lemma ModularCyclotomicCharacter_mul (g:  L ≃+* L) (h:  L ≃+* L) (n : ℕ+) (hGcard : Fintype.card (Torsion L n) = n):
+--  do we need to assume we have all nth roots of unity?
 
--- lemma ModularCyclotomicCharacter_comm (g:  L ≃+* L) (h:  L ≃+* L) (n : ℕ+) :
--- --  do we need to assume we have all nth roots of unity?
---   (ModularCyclotomicCharacter g n).val+(ModularCyclotomicCharacter h n).val =(ModularCyclotomicCharacter (g * h) n).val := by
---     have hyp: ∀ t ∈ Torsion L n, (g * h) t=t^( (ModularCyclotomicCharacter g n).val*(ModularCyclotomicCharacter h n).val):= by
---       apply ModularCyclotomicCharacter_spec
 
+  (ModularCyclotomicCharacter g n)*(ModularCyclotomicCharacter h n) =(ModularCyclotomicCharacter (g * h) n) := by
+    -- have hyp: ∀ t ∈ Torsion L n, (g * h) t=t^( (ModularCyclotomicCharacter g n).val*(ModularCyclotomicCharacter h n).val):= by
+  apply ModularCyclotomicCharacter.ext n _ _ hGcard
+  intro t
+  apply SetCoe.ext
+  rw [← ModularCyclotomicCharacter_spec]
+  change _ = (g (h t))
+  rw [ModularCyclotomicCharacter_spec]
+  rw [ModularCyclotomicCharacter_spec]
+  -- cases' t with t ht
+  simp
+  rw [← pow_mul]
+  rw [coe_pow]
+  rw [coe_pow]
+  congr 1
+  rw [pow_eq_pow_iff_modEq]
+  rw [← ZMod.nat_cast_eq_nat_cast_iff]
+  -- Solve (2) with `have foo : ((ZMod.val a) : ZMod n) = a := by simp?`. Again
+  -- the output tells you the relevant lemmas
+  simp [ZMod.nat_cast_val, ZMod.cast_id']
+  rw [coe_mul, mul_comm]
+  rw [← hGcard]
+  exact orderOf_dvd_card_univ
+  tada
+
+  
 --   done
 
 
