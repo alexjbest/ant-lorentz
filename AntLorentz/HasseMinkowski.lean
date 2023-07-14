@@ -93,7 +93,6 @@ theorem HasseMinkowski_easy_way [Module.Finite ℚ V] (F : QuadraticForm ℚ V) 
     simp [hx]
     sorry
 
-namespace QuadraticForm
 
 
 -- General dimension
