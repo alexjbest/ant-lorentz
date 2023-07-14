@@ -7,7 +7,7 @@ Getting the code
 
 
 - install elan
-- run `lake get alexjbest/ant-lorentz` 
+- run `git clone git@github.com:alexjbest/ant-lorentz.git` 
 - change to the ant-lorentz directory
 - run `lake exe cache get`
 - open the project in vscode
