@@ -130,9 +130,10 @@ theorem QuadraticForm.global_to_local (F : QuadraticForm ℚ V) : F.Isotropic �
   sorry -- todo: base change of non-zero to ℝ is non-zero
 
 -- using equivalent forms
-lemma HM_of_Equivalent {Q S : QuadraticForm ℚ V} (h : Q.Equivalent S) :
-    Q.Hasse_Minkowski ↔ S.Hasse_Minkowski := by
-  simp only [Hasse_Minkowski, Isotropic, EverywhereLocallyIsotropic] at *
+lemma HasseMinkowski_of_Equivalent {Q : QuadraticForm ℚ V} {S : QuadraticForm ℚ V₂}
+    (h : Q.Equivalent S) :
+    Q.HasseMinkowski ↔ S.HasseMinkowski := by
+  simp only [HasseMinkowski, Isotropic, EverywhereLocallyIsotropic] at *
   simp only [anisotropic_iff _ _ h]
   rw [anisotropic_iff _ _ (baseChange.Equivalent ℝ _ _ h)]
   conv in (Anisotropic (baseChange _ Q)) =>
@@ -203,15 +204,6 @@ theorem HasseMinkowski1 (hV : Module.rank V = 1) :
 
 
 -- Some general lemmas for all cases of dimension at least 2:
-lemma HasseMinkowski_of_Equivalent {Q : QuadraticForm ℚ V} {S : QuadraticForm ℚ V₂}
-    (h : Q.Equivalent S) :
-    Q.HasseMinkowski ↔ S.HasseMinkowski := by
-  simp only [HasseMinkowski, Isotropic, EverywhereLocallyIsotropic] at *
-  simp only [anisotropic_iff _ _ h]
-  rw [anisotropic_iff _ _ (baseChange.Equivalent ℝ _ _ h)]
-  conv in (Anisotropic (baseChange _ Q)) =>
-    rw [anisotropic_iff _ _ (baseChange.Equivalent (R := ℚ) ℚ_[p] _ _ h)]
-
 
 theorem HasseMinkowski_of_degenerate (Q : QuadraticForm ℚ V) (hQ : ¬ (associated (R₁ := ℚ) Q).Nondegenerate) :
   HasseMinkowski Q := by
