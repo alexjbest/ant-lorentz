@@ -145,22 +145,10 @@ namespace QuadraticForm
 -- a nontrivial project (probably publishable if someone does it)
 theorem Hasse_Minkowski_proof : ∀ (F : QuadraticForm ℚ V), F.Hasse_Minkowski := sorry
 
--- some easier problems
+-- General dimension
 
 variable (k W : Type) [Field k] [AddCommGroup W]
 
--- The quadratic form 0 on a vector space of dimension greater than zero is isotropic. 
-lemma Isotropic_of_zero_quadForm_dim_ge1 [Module k W] (Q : QuadraticForm k W) (h₁ : Q=0) 
-(h₂ : Module.rank k W ≠ 0) : Q.Isotropic := by
-  rw [QuadraticForm.Isotropic]
-  rw [QuadraticForm.Anisotropic]
-  have h: ∃ (w : W), w ≠ 0 := by
-    simpa only [ne_eq, rank_zero_iff_forall_zero, not_forall] using h₂
-  obtain ⟨w, hw⟩ := h 
-  have : Q w = 0 := by 
-    rw [h₁]
-    simp only [zero_apply]
-  tauto
 
 -- the easy direction
 theorem QuadraticForm.global_to_local (F : QuadraticForm ℚ V) : F.Isotropic → F.EverywhereLocallyIsotropic := by
@@ -178,6 +166,15 @@ theorem QuadraticForm.global_to_local (F : QuadraticForm ℚ V) : F.Isotropic �
   · rw [F.baseChange_eval ℝ x, Fx0]
     simp only [mul_one, _root_.map_zero, mul_zero]
   sorry -- todo: base change of non-zero to ℝ is non-zero
+
+-- using equivalent forms
+lemma HM_of_Equivalent {Q S : QuadraticForm ℚ V} (h : Q.Equivalent S) :
+    Q.Hasse_Minkowski ↔ S.Hasse_Minkowski := by
+  simp only [Hasse_Minkowski, Isotropic, EverywhereLocallyIsotropic] at *
+  simp only [anisotropic_iff _ _ h]
+  rw [anisotropic_iff _ _ (baseChange.Equivalent ℝ _ _ h)]
+  conv in (Anisotropic (baseChange _ Q)) =>
+    rw [anisotropic_iff _ _ (baseChange.Equivalent (R := ℚ) ℚ_[p] _ _ h)]
 
 
 -- (0) dim(V)=0 case
@@ -244,16 +241,6 @@ lemma anisotropic_of_nonzero_quadForm_dim_1 [Module k W] (Q : QuadraticForm k W)
 theorem Hasse_Minkowski1 (hV : Module.rank V = 1) :
     ∀ (F : QuadraticForm ℚ V), Hasse_Minkowski F := sorry
 
-
--- Some general lemmas for all cases of dimension at least 2:
-
-lemma HM_of_Equivalent {Q S : QuadraticForm ℚ V} (h : Q.Equivalent S) :
-    Q.Hasse_Minkowski ↔ S.Hasse_Minkowski := by
-  simp only [Hasse_Minkowski, Isotropic, EverywhereLocallyIsotropic] at *
-  simp only [anisotropic_iff _ _ h]
-  rw [anisotropic_iff _ _ (baseChange.Equivalent ℝ _ _ h)]
-  conv in (Anisotropic (baseChange _ Q)) =>
-    rw [anisotropic_iff _ _ (baseChange.Equivalent (R := ℚ) ℚ_[p] _ _ h)]
 
 
 -- (2) dim(V)=2 case
