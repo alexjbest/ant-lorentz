@@ -42,19 +42,6 @@ Thoughts:
 - https://etd.ohiolink.edu/apexprod/rws_etd/send_file/send?accession=osu1338317481&disposition=inline seems an ok reference for 2,3
 -/
 
-section base_change
-
-/-
-
-## Base extension of quadratic forms
-
-Unfortunately we don't seem to have this in the library, so we have
-to develop it ourselves including making all the basic results which we'll need.
-Note that we also make the theory in maximal generality (for example
-we use semirings instead of rings, so the theory works for quadratic
-forms over the naturals)
-
--/
 
 -- Let `M` be an `R`-module
 variable {R : Type _} {M : Type _} [CommRing R] [AddCommGroup M] [Module R M]
@@ -80,7 +67,7 @@ lemma LinearMap.baseChange_id {R A M} [CommRing R] [Ring A] [Algebra R A]
   [Module R M] :
   LinearMap.baseChange A LinearMap.id (R := R) = LinearMap.id (M := A ⊗[R] M) := by
   ext
-  simp
+  simp only [AlgebraTensorModule.curry_apply, curry_apply, coe_restrictScalars, baseChange_tmul, id_coe, id_eq]
 
 
 @[simp]
@@ -89,7 +76,8 @@ lemma LinearMap.baseChange_comp {R A M N} [CommRing R] [Ring A] [Algebra R A]
     [Module R M] [Module R N] [Module R B] (f : M →ₗ[R] N) (g : N →ₗ[R] B) :
   (g.baseChange A).comp (f.baseChange A) = (g.comp f).baseChange A := by
   ext
-  simp
+  simp only [AlgebraTensorModule.curry_apply, curry_apply, coe_restrictScalars, coe_comp, Function.comp_apply,
+    baseChange_tmul]
 
 -- TODO timeout if we make A a semiring
 def LinearEquiv.baseChange {R A M N} [CommRing R] [Ring A] [Algebra R A] [AddCommMonoid M] [AddCommMonoid N]
@@ -100,11 +88,12 @@ def LinearEquiv.baseChange {R A M N} [CommRing R] [Ring A] [Algebra R A] [AddCom
     invFun := LinearMap.baseChange A f.symm
     left_inv := by
       intro a
-      simp [← LinearMap.comp_apply]
+      simp only [AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ← LinearMap.comp_apply, LinearMap.baseChange_comp, comp_coe,
+        self_trans_symm, refl_toLinearMap, LinearMap.baseChange_id, LinearMap.id_coe, id_eq]
     right_inv := by
       intro a
-      simp [← LinearMap.comp_apply]
-
+      simp only [AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ← LinearMap.comp_apply, LinearMap.baseChange_comp, comp_coe,
+        symm_trans_self, refl_toLinearMap, LinearMap.baseChange_id, LinearMap.id_coe, id_eq]
 
 
 lemma QuadraticForm.baseChange.Equivalent
@@ -115,7 +104,7 @@ lemma QuadraticForm.baseChange.Equivalent
   constructor
   use (LinearEquiv.baseChange val.toLinearEquiv)
   intro m
-  simp
+  simp only [AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, LinearEquiv.coe_coe]
   -- rw? -- TODO timeout whnf very quickly
   sorry
 
@@ -147,20 +136,22 @@ theorem Hasse_Minkowski_proof : ∀ (F : QuadraticForm ℚ V), F.Hasse_Minkowski
 
 variable (k W : Type) [Field k] [AddCommGroup W]
 
+-- The quadratic form 0 on a vector space of dimension greater than zero is isotropic. 
 lemma Isotropic_of_zero_quadForm_dim_ge1 [Module k W] (Q : QuadraticForm k W) (h₁ : Q=0) 
 (h₂ : Module.rank k W ≠ 0) : Q.Isotropic := by
   rw [QuadraticForm.Isotropic]
   rw [QuadraticForm.Anisotropic]
   have h: ∃ (w : W), w ≠ 0 := by
-    simpa [rank_zero_iff_forall_zero] using h₂
+    simpa only [ne_eq, rank_zero_iff_forall_zero, not_forall] using h₂
   obtain ⟨w, hw⟩ := h 
   have : Q w = 0 := by 
     rw [h₁]
-    simp
+    simp only [zero_apply]
   tauto
 
 -- (0) dim(V)=0 case
 
+-- Every quadratic form on a zero-dimensional vector space is anisotropic. 
 lemma anisotropic_of_quadForm_dim_zero [Module k W] (Q : QuadraticForm k W) 
 (h : Module.rank k W = 0) : Q.Anisotropic := by
    intro (w : W)
@@ -175,20 +166,21 @@ theorem Hasse_Minkowski0 (hV : Module.rank ℚ V = 0) : ∀ (F : QuadraticForm �
    · contrapose
      intro 
      rw [QuadraticForm.Isotropic]
-     simp
+     simp only [not_not]
      apply anisotropic_of_quadForm_dim_zero _ _ F hV
    · contrapose
      intro 
      rw [QuadraticForm.EverywhereLocallyIsotropic]
      push_neg
      intro 
-     simp 
+     simp only [not_not] 
      apply anisotropic_of_quadForm_dim_zero
      rw [← base_change_module_rank_preserved, hV] 
 
 
 -- (1) dim(V)=1 case
 
+-- Every non-zero quadratic form on a vector space of dimension 1 is anisotropic. 
 lemma anisotropic_of_nonzero_quadForm_dim_1 [Module k W] (Q : QuadraticForm k W) 
 (h₁ : Q ≠ 0) (h₂ : Module.rank k W = 1) : Q.Anisotropic := sorry
 
@@ -199,7 +191,7 @@ theorem Hasse_Minkowski1 (hV : Module.rank V = 1) :
 lemma HM_of_Equivalent {Q S : QuadraticForm ℚ V} (h : Q.Equivalent S) :
     Q.Hasse_Minkowski ↔ S.Hasse_Minkowski := by
   simp only [Hasse_Minkowski, Isotropic, EverywhereLocallyIsotropic] at *
-  simp [anisotropic_iff _ _ h]
+  simp only [anisotropic_iff _ _ h]
   rw [anisotropic_iff _ _ (baseChange.Equivalent ℝ _ _ h)]
   conv in (Anisotropic (baseChange _ Q)) =>
     rw [anisotropic_iff _ _ (baseChange.Equivalent (R := ℚ) ℚ_[p] _ _ h)]
