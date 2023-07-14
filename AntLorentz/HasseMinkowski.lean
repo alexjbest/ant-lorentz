@@ -105,6 +105,12 @@ def LinearEquiv.baseChange {R A M N} [CommRing R] [Ring A] [Algebra R A] [AddCom
       intro a
       simp [← LinearMap.comp_apply]
 
+@[simp]
+lemma LinearEquiv.baseChange_apply {R A M N} [CommRing R] [Ring A] [Algebra R A] [AddCommMonoid M] [AddCommMonoid N]
+    [Module R M] [Module R N]
+    (f : M ≃ₗ[R] N) (a : A) (v : M) :
+  ((f.baseChange : A ⊗[R] M ≃ₗ[A] A ⊗[R] N) : _ → _) (a ⊗ₜ[R] v) = (a ⊗ₜ f v) := rfl
+
 
 
 lemma QuadraticForm.baseChange.Equivalent
@@ -117,10 +123,20 @@ lemma QuadraticForm.baseChange.Equivalent
   intro m
   simp
   -- rw? -- TODO timeout whnf very quickly
-  sorry
+  induction m using TensorProduct.induction_on
+  . simp
+  . simp
+  . simp [map_add, *]
+    obtain ⟨B, hB⟩ := (baseChange A S).exists_companion
+    rw [hB] at *
+    simp [*]
+
+
+
+end base_change
 
 -- Let V be a ℚ-vector space
-variable {V : Type} [AddCommGroup V] [Module ℚ V]
+variable {V : Type _} [AddCommGroup V] [Module ℚ V]
 
 -- Assume `V` is finite-dimensional (mathematical remark: is this definitely necessary??)
 variable [FiniteDimensional ℚ V]
@@ -187,7 +203,7 @@ theorem Hasse_Minkowski1 (hV : Module.rank V = 1) :
     ∀ (F : QuadraticForm ℚ V), Hasse_Minkowski F := sorry
 
 
-lemma HM_of_Equivalent {Q S : QuadraticForm ℚ V} (h : Q.Equivalent S) :
+lemma Hasse_Minkowski_of_Equivalent {Q S : QuadraticForm ℚ V} (h : Q.Equivalent S) :
     Q.Hasse_Minkowski ↔ S.Hasse_Minkowski := by
   simp only [Hasse_Minkowski, Isotropic, EverywhereLocallyIsotropic] at *
   simp [anisotropic_iff _ _ h]
@@ -195,7 +211,27 @@ lemma HM_of_Equivalent {Q S : QuadraticForm ℚ V} (h : Q.Equivalent S) :
   conv in (Anisotropic (baseChange _ Q)) =>
     rw [anisotropic_iff _ _ (baseChange.Equivalent (R := ℚ) ℚ_[p] _ _ h)]
 
+theorem HasseMinkowski_of_degenerate (Q : QuadraticForm ℚ V) (hQ : ¬ (associated (R₁ := ℚ) Q).Nondegenerate) :
+  Hasse_Minkowski Q := by
+  sorry
+  
 
+
+open FinVec
+theorem ex (Q : QuadraticForm ℚ V) (h : FiniteDimensional.finrank ℚ V = 2)
+    (hQ : (associated (R₁ := ℚ) Q).Nondegenerate) :
+  Hasse_Minkowski Q := by
+  obtain ⟨w, hw1, hw0, hEQ⟩ := equivalent_weightedSumSquares_units_of_nondegenerate'' Q _ h.symm hQ
+  have := Hasse_Minkowski_of_Equivalent hEQ
+  rw [Anisotropic]
+  rw [anisotropic_iff Q (weightedSumSquares ℚ w) hEQ]
+  intro x
+  simp at *
+  -- rw [show x = ![x 0, x 1] from (etaExpand_eq x).symm]
+  -- simp at *
+  simp [hw1]
+  
+end
 -- (2) dim(V)=2 case
 theorem Hasse_Minkowski2 (hV : Module.rank V = 2) :
     ∀ (F : QuadraticForm ℚ V), Hasse_Minkowski F := sorry

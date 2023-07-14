@@ -1,4 +1,6 @@
 import Mathlib.LinearAlgebra.QuadraticForm.Isometry
+import Mathlib.Algebra.Squarefree
+import Mathlib.Data.Fin.Tuple.Reflection
 
 -- THESE things are probably not needed as equivalent_weightedSumSquares_units_of_nondegenerate' is in the library
 -- variable {V : Type u} {K : Type v} [Field K] [AddCommGroup V] [Module K V]
@@ -66,7 +68,8 @@ open QuadraticForm
 --   sorry
 --   exact orthogonal_basis.iIsOrtho Q
 
-lemma anisotropic_of_Equivalent (Q S : QuadraticForm R M) (h : Q.Equivalent S) :
+lemma anisotropic_of_Equivalent
+    [AddCommGroup M₂] [Module R M₂] (Q : QuadraticForm R M) (S : QuadraticForm R M₂) (h : Q.Equivalent S) :
     Q.Anisotropic → S.Anisotropic := by
   rcases h with ⟨val⟩
   intro h
@@ -78,12 +81,36 @@ lemma anisotropic_of_Equivalent (Q S : QuadraticForm R M) (h : Q.Equivalent S) :
   simpa using h
 
 
-lemma anisotropic_iff (Q S : QuadraticForm R M) (h : Q.Equivalent S) :
+lemma anisotropic_iff [AddCommGroup M₂] [Module R M₂] (Q : QuadraticForm R M) (S : QuadraticForm R M₂) (h : Q.Equivalent S) :
     Q.Anisotropic ↔ S.Anisotropic := 
-⟨anisotropic_of_Equivalent _ _ h, anisotropic_of_Equivalent _ _ h.symm⟩
+⟨anisotropic_of_Equivalent Q S h, anisotropic_of_Equivalent S Q h.symm⟩
   
 
 
 -- lemma exists_weighted₂ (hf : finrank R M = 2) (Q : QuadraticForm R M) :
 --     ∃ a b : R, Q.Anisotropic ↔ (weightedSumSquares R ![a, b]).Anisotropic := by
 --   simp [Anisotropic]
+
+section
+variable [AddCommGroup V] [Module ℚ V]
+
+instance : Invertible (2 : ℚ) := ⟨2⁻¹, by norm_num, by norm_num⟩
+
+-- theorem equivalent_weightedSumSquares_units_of_nondegenerate'' (Q : QuadraticForm ℚ V) (h : 0 < FiniteDimensional.finrank ℚ V)
+--     (hQ : (associated (R₁ := ℚ) Q).Nondegenerate) :
+--     ∃ (w : Fin a → ℤ)
+--       (hw1 : w ⟨0, h⟩ = 1)
+--       (hw0 : ∀ i, Squarefree (w i)),
+--       Equivalent Q (weightedSumSquares ℚ w) := by
+--     sorry
+
+-- TODO simpa only not clickable
+
+theorem equivalent_weightedSumSquares_units_of_nondegenerate'' (Q : QuadraticForm ℚ V) (h : 0 < FiniteDimensional.finrank ℚ V)
+    (ha : a = FiniteDimensional.finrank ℚ V)
+    (hQ : (associated (R₁ := ℚ) Q).Nondegenerate) :
+    ∃ (w : Fin a → ℤ)
+      (hw1 : w ⟨0, ha ▸ h⟩ = 1)
+      (hw0 : ∀ i, Squarefree (w i)),
+      Equivalent Q (weightedSumSquares ℚ w) := by
+    sorry
