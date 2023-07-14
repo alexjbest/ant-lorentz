@@ -96,7 +96,7 @@ theorem HasseMinkowski_easy_way [Module.Finite ℚ V] (F : QuadraticForm ℚ V) 
 namespace QuadraticForm
 
 
--- some easier problems
+-- General dimension
 
 variable (k W : Type) [Field k] [AddCommGroup W]
 
@@ -128,6 +128,15 @@ theorem QuadraticForm.global_to_local (F : QuadraticForm ℚ V) : F.Isotropic �
   · rw [F.baseChange_eval ℝ x, Fx0]
     simp only [mul_one, _root_.map_zero, mul_zero]
   sorry -- todo: base change of non-zero to ℝ is non-zero
+
+-- using equivalent forms
+lemma HM_of_Equivalent {Q S : QuadraticForm ℚ V} (h : Q.Equivalent S) :
+    Q.Hasse_Minkowski ↔ S.Hasse_Minkowski := by
+  simp only [Hasse_Minkowski, Isotropic, EverywhereLocallyIsotropic] at *
+  simp only [anisotropic_iff _ _ h]
+  rw [anisotropic_iff _ _ (baseChange.Equivalent ℝ _ _ h)]
+  conv in (Anisotropic (baseChange _ Q)) =>
+    rw [anisotropic_iff _ _ (baseChange.Equivalent (R := ℚ) ℚ_[p] _ _ h)]
 
 
 -- (0) dim(V)=0 case
