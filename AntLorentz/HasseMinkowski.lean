@@ -6,6 +6,18 @@ import Mathlib.NumberTheory.Padics.PadicNumbers
 import AntLorentz.Diagonalize
 import AntLorentz.BaseChange
 
+--import Lean
+--open Lean Elab Tactic
+
+--elab "tada" : tactic => do
+--  let gs ← getUnsolvedGoals
+--  if gs.isEmpty then
+--    logInfo "Goals accomplished 🎉"
+--  else
+--    Term.reportUnsolvedGoals gs
+--    throwAbortTactic
+
+
 namespace QuadraticForm
 
 variable [Semiring R] [AddCommMonoid M] [Module R M]
@@ -81,6 +93,8 @@ theorem HasseMinkowski_easy_way [Module.Finite ℚ V] (F : QuadraticForm ℚ V) 
     simp [hx]
     sorry
 
+namespace QuadraticForm
+
 
 -- some easier problems
 
@@ -98,6 +112,24 @@ lemma Isotropic_of_zero_quadForm_dim_ge1 [Module k W] (Q : QuadraticForm k W) (h
     simp only [zero_apply]
   tauto
 
+-- the easy direction
+theorem QuadraticForm.global_to_local (F : QuadraticForm ℚ V) : F.Isotropic → F.EverywhereLocallyIsotropic := by
+  simp only [Isotropic, Anisotropic, not_forall, exists_prop, EverywhereLocallyIsotropic, forall_exists_index, and_imp]
+  intro x Fx0 xn0
+  constructor
+  · intro p hp
+    use ((1 : ℚ_[p]) ⊗ₜ x)
+    constructor
+    · rw [F.baseChange_eval ℚ_[p] x, Fx0]
+      simp only [mul_one, _root_.map_zero, mul_zero]
+    sorry -- todo: base change of non-zero to ℚ_[p] is non-zero
+  use ((1 : ℝ) ⊗ₜ x)
+  constructor
+  · rw [F.baseChange_eval ℝ x, Fx0]
+    simp only [mul_one, _root_.map_zero, mul_zero]
+  sorry -- todo: base change of non-zero to ℝ is non-zero
+
+
 -- (0) dim(V)=0 case
 
 -- Every quadratic form on a zero-dimensional vector space is anisotropic. 
@@ -107,35 +139,61 @@ lemma anisotropic_of_quadForm_dim_zero [Module k W] (Q : QuadraticForm k W)
   rw [rank_zero_iff_forall_zero] at h
   exact h w
 
+-- Proof of Hasse Minkowski in dimension 0.
 theorem HasseMinkowski0 (hV : Module.rank ℚ V = 0) : ∀ (F : QuadraticForm ℚ V), HasseMinkowski F := by
-  intro F
-  rw [HasseMinkowski]
-  constructor 
-  · contrapose
-    intro 
-    rw [QuadraticForm.Isotropic]
-    simp only [not_not]
-    apply anisotropic_of_quadForm_dim_zero _ _ F hV
-  · contrapose
-    intro 
-    rw [QuadraticForm.EverywhereLocallyIsotropic]
-    push_neg
-    intro 
-    simp only [not_not] 
-    apply anisotropic_of_quadForm_dim_zero
-    rw [← base_change_module_rank_preserved, hV] 
+   intro F
+   rw [HasseMinkowski]
+   constructor 
+   · contrapose
+     intro 
+     rw [QuadraticForm.Isotropic]
+     simp only [not_not]
+     apply anisotropic_of_quadForm_dim_zero _ _ F hV
+   · contrapose
+     intro 
+     rw [QuadraticForm.EverywhereLocallyIsotropic]
+     push_neg
+     intro 
+     simp only [not_not] 
+     apply anisotropic_of_quadForm_dim_zero
+     rw [← base_change_module_rank_preserved, hV] 
+
+
+-- General lemma for all cases of dimension at least 1:
+
+-- The quadratic form 0 on a vector space of dimension greater than zero is isotropic. 
+lemma isotropic_of_zero_quadForm_dim_ge1 [Module k W] (Q : QuadraticForm k W) (h₁ : Q = 0)
+    (h₂ : Module.rank k W ≠ 0) : Q.Isotropic := by
+  rw [QuadraticForm.Isotropic]
+  rw [QuadraticForm.Anisotropic]
+  have h: ∃ (w : W), w ≠ 0 := by
+    simpa [rank_zero_iff_forall_zero] using h₂
+  obtain ⟨w, hw⟩ := h 
+  have : Q w = 0 := by 
+    rw [h₁]
+    simp
+  tauto
 
 
 -- (1) dim(V)=1 case
 
 -- Every non-zero quadratic form on a vector space of dimension 1 is anisotropic. 
 lemma anisotropic_of_nonzero_quadForm_dim_1 [Module k W] (Q : QuadraticForm k W) 
-    (h₁ : Q ≠ 0) (h₂ : Module.rank k W = 1) : Q.Anisotropic := sorry
+    (h₁ : Q ≠ 0) (h₂ : Module.rank k W = 1) : Q.Anisotropic := by
+  rw [QuadraticForm.Anisotropic]
+  have h: ∃ (w : W), Q w ≠ 0 := by sorry -- using h₁
+  obtain ⟨w, hw⟩ := h   
+  have h': ∀ (v : W) (h'': v ≠ 0), Q v ≠ 0 := by sorry -- using h₂: v = a*w, Q v = a^2*Q w ≠ 0
+  intro 
+  contrapose
+  apply h'     
 
+-- Proof of Hasse Minkowski in dimension 1. 
 theorem HasseMinkowski1 (hV : Module.rank V = 1) :
     ∀ (F : QuadraticForm ℚ V), HasseMinkowski F := sorry
 
 
+-- Some general lemmas for all cases of dimension at least 2:
 lemma HasseMinkowski_of_Equivalent {Q : QuadraticForm ℚ V} {S : QuadraticForm ℚ V₂}
     (h : Q.Equivalent S) :
     Q.HasseMinkowski ↔ S.HasseMinkowski := by
