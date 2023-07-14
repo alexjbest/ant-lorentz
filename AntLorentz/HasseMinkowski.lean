@@ -147,6 +147,7 @@ theorem Hasse_Minkowski_proof : ∀ (F : QuadraticForm ℚ V), F.Hasse_Minkowski
 
 variable (k W : Type) [Field k] [AddCommGroup W]
 
+-- The quadratic form 0 on a vector space of dimension greater than zero is isotropic. 
 lemma Isotropic_of_zero_quadForm_dim_ge1 [Module k W] (Q : QuadraticForm k W) (h₁ : Q=0) 
 (h₂ : Module.rank k W ≠ 0) : Q.Isotropic := by
   rw [QuadraticForm.Isotropic]
@@ -161,6 +162,7 @@ lemma Isotropic_of_zero_quadForm_dim_ge1 [Module k W] (Q : QuadraticForm k W) (h
 
 -- (0) dim(V)=0 case
 
+-- Every quadratic form on a zero-dimensional vector space is anisotropic. 
 lemma anisotropic_of_quadForm_dim_zero [Module k W] (Q : QuadraticForm k W) 
 (h : Module.rank k W = 0) : Q.Anisotropic := by
    intro (w : W)
@@ -189,6 +191,7 @@ theorem Hasse_Minkowski0 (hV : Module.rank ℚ V = 0) : ∀ (F : QuadraticForm �
 
 -- (1) dim(V)=1 case
 
+-- Every non-zero quadratic form on a vector space of dimension 1 is anisotropic. 
 lemma anisotropic_of_nonzero_quadForm_dim_1 [Module k W] (Q : QuadraticForm k W) 
 (h₁ : Q ≠ 0) (h₂ : Module.rank k W = 1) : Q.Anisotropic := sorry
 
