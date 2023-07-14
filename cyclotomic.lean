@@ -68,7 +68,7 @@ def Torsion : Submonoid L where
 
 
 
-    instance : Group (Torsion L n) where
+instance : Group (Torsion L n) where
   toMonoid := inferInstance
   inv := fun x ↦ ⟨x⁻¹, by
   -- show x^-1 is also a torsion point.
@@ -232,8 +232,6 @@ lemma coe_mul (n m : ℕ) (a b : ZMod n) (h : m ∣ n) : ((a * b : ZMod n) : ZMo
 
 lemma ModularCyclotomicCharacter_mul (g:  L ≃+* L) (h:  L ≃+* L) (n : ℕ+) (hGcard : Fintype.card (Torsion L n) = n):
 --  do we need to assume we have all nth roots of unity?
-
-
   (ModularCyclotomicCharacter g n)*(ModularCyclotomicCharacter h n) =(ModularCyclotomicCharacter (g * h) n) := by
     -- have hyp: ∀ t ∈ Torsion L n, (g * h) t=t^( (ModularCyclotomicCharacter g n).val*(ModularCyclotomicCharacter h n).val):= by
   apply ModularCyclotomicCharacter.ext n _ _ hGcard

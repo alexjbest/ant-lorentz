@@ -132,14 +132,30 @@ lemma BilinForm.baseChangeSymm (F : BilinForm R M) (hF : F.IsSymm) :
       simp only [add_right, add_left, *]
       ac_rfl
 
-/-- If F_A is the base change of the quadratic form F to A, then F_A(a ⊗ m) = a^2*F(m). -/
 @[simp]
-lemma QuadraticForm.baseChange_companion (F : QuadraticForm R M) [Invertible (2 : R)] [Invertible (2 : A)] :
+lemma QuadraticForm.baseChange_associatedHom (F : QuadraticForm R M) [Invertible (2 : R)] [Invertible (2 : A)] :
   associatedHom R (F.baseChange A) = (associatedHom R F).baseChange A := by
   simp only [baseChange]
   apply associated_left_inverse
   apply BilinForm.baseChangeSymm
   exact associated_isSymm R F
+
+section associated
+variable [CommRing R₁] [AddCommGroup M] [Module R₁ M]
+
+variable [Invertible (2 : R₁)]
+variable {A : Type _} [CommRing A] [Algebra R₁ A] [Invertible (2 : A)]
+variable (F : QuadraticForm R₁ M)
+  
+@[simp]
+lemma QuadraticForm.baseChange_associated (F : QuadraticForm R₁ M) :
+  -- this is annoying
+  (associated : _ →ₗ[A] _) (F.baseChange A) = ((associated : _ →ₗ[R₁] _) F).baseChange A := by
+  simp only [baseChange]
+  apply associated_left_inverse
+  apply BilinForm.baseChangeSymm
+  exact associated_isSymm R₁ F
+end associated
 
 -- /-- If F_A is the base change of the quadratic form F to A, then F_A(a ⊗ m) = a^2*F(m). -/
 -- @[simp]
@@ -176,6 +192,7 @@ forms over the naturals)
 
 -- Let `M` be an `R`-module
 variable {R : Type _} {M : Type _} [CommRing R] [AddCommGroup M] [Module R M]
+variable              {M₂ : Type _}              [AddCommGroup M₂] [Module R M₂]
 
 -- Let `A` be an `R`-algebra
 variable (A : Type _) [Semiring A] [Algebra R A]
@@ -233,7 +250,7 @@ lemma LinearEquiv.baseChange_apply {R A M N} [CommRing R] [Ring A] [Algebra R A]
 
 lemma QuadraticForm.baseChange.Equivalent
   (A : Type _) [CommRing A] [Algebra R A]
-  (Q S : QuadraticForm R M) (h : Q.Equivalent S) :
+  (Q : QuadraticForm R M) (S : QuadraticForm R M₂) (h : Q.Equivalent S) :
     (baseChange A Q).Equivalent (baseChange A S) := by
   cases' h with val
   constructor
@@ -250,26 +267,62 @@ lemma QuadraticForm.baseChange.Equivalent
     simp [*]
     sorry
 
-
-
 end base_change
+
+section basis
 variable [Field k] [AddCommGroup M] [Module k M] [Ring A] [Algebra k A] [Module A M] [IsScalarTower k A M] 
   [StrongRankCondition A] [Module.Free k M] [Module.Free A M] [Module.Free k A]
 
 open TensorProduct -- for notation
 
-def base_change_basis (h : Basis ι k M) : Basis ι A (A ⊗[k] M) :=
-TensorProduct.Algebra.basis
--- let i := LinearEquiv.baseChange (A := A) h.repr
--- ⟨sorry
--- ⟩
+noncomputable
+def _root_.Basis.base_change (h : Basis ι k M) : Basis ι A (A ⊗[k] M) :=
+Algebra.TensorProduct.basis A h
+
 lemma base_change_module_rank_preserved : Module.rank k M = Module.rank A (A ⊗[k] M) := by 
   obtain ⟨⟨_, bM⟩⟩ := Module.Free.exists_basis (R := k) (M := M)
-  rw [← bM.mk_eq_rank'']
-  rw [bM.baseChange.mk_eq_rank'']
-  --have : Module.Free A (A ⊗[k] M) := by sorry
-  --have := lift_rank_mul_lift_rank k A (A ⊗[k] M) 
-  --rw [rank_tensorProduct] at this
-  sorry -- not done yet, statement should be correct with the assumtions now 
+  rw [← bM.mk_eq_rank'', (bM.base_change (A := A)).mk_eq_rank'']
+end basis
 
+-- section discr
+-- variable [Field k] [AddCommGroup M] [Module k M] [CommRing A] [Algebra k A] [Module A M] [IsScalarTower k A M] 
+--   [StrongRankCondition A] [Module.Free k M] [Module.Free A M] [Module.Free k A]
+--   [Invertible (2 : k)]
+--   [Invertible (2 : A)]
 
+-- open TensorProduct -- for notation
+
+-- lemma discr (Q : QuadraticForm k M) : (Q.baseChange A).discr = Q.discr := by 
+--   obtain ⟨⟨_, bM⟩⟩ := Module.Free.exists_basis (R := k) (M := M)
+--   rw [← bM.mk_eq_rank'', (bM.base_change (A := A)).mk_eq_rank'']
+
+-- end discr
+section degenerate
+variable {k A} [Field k] [AddCommGroup M] [Module k M] [CommRing A] [Algebra k A] [Module A M] [IsScalarTower k A M] 
+  [StrongRankCondition A] [Module.Free k M] [Module.Free A M] [Module.Free k A]
+  [Invertible (2 : k)]
+  [Invertible (2 : A)] -- TODO should this follow from TC
+
+open QuadraticForm
+theorem BilinForm.baseChange_of_degenerate (B : BilinForm k M) (hB : ¬ B.Nondegenerate) :
+    ¬ (B.baseChange A).Nondegenerate := by
+  simp only [BilinForm.Nondegenerate, not_forall, exists_prop] at *
+  obtain ⟨x, hn, hx⟩ := hB
+  refine ⟨(1 ⊗ₜ x), ?_, ?_⟩
+  . intro n
+    induction n using TensorProduct.induction_on
+    . simp
+    . simp [hn]
+    . simp [*]
+  . simp
+    intro h
+    apply hx
+    sorry -- need to assume module is flat or something TODO?
+    
+
+theorem baseChange_of_degenerate (Q : QuadraticForm k M) (hQ : ¬ (associated (R₁ := k) Q).Nondegenerate) :
+    ¬ (associated (R₁ := A) (Q.baseChange A)).Nondegenerate := by
+  simp only [baseChange_associated]
+  exact BilinForm.baseChange_of_degenerate _ hQ
+
+end degenerate
