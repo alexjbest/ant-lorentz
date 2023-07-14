@@ -6,6 +6,18 @@ import Mathlib.NumberTheory.Padics.PadicNumbers
 import AntLorentz.Diagonalize
 import AntLorentz.BaseChange
 
+--import Lean
+--open Lean Elab Tactic
+
+--elab "tada" : tactic => do
+--  let gs ← getUnsolvedGoals
+--  if gs.isEmpty then
+--    logInfo "Goals accomplished 🎉"
+--  else
+--    Term.reportUnsolvedGoals gs
+--    throwAbortTactic
+
+
 namespace QuadraticForm
 
 variable [Semiring R] [AddCommMonoid M] [Module R M]
@@ -127,6 +139,7 @@ def QuadraticForm.EverywhereLocallyIsotropic :=
 def QuadraticForm.Hasse_Minkowski (F : QuadraticForm ℚ V) : Prop :=
   F.Isotropic ↔ F.EverywhereLocallyIsotropic
 
+
 namespace QuadraticForm
 
 -- a nontrivial project (probably publishable if someone does it)
@@ -177,6 +190,7 @@ lemma anisotropic_of_quadForm_dim_zero [Module k W] (Q : QuadraticForm k W)
    rw [rank_zero_iff_forall_zero] at h
    exact h w
 
+-- Proof of Hasse Minkowski in dimension 0.
 theorem Hasse_Minkowski0 (hV : Module.rank ℚ V = 0) : ∀ (F : QuadraticForm ℚ V), Hasse_Minkowski F := by
    intro F
    rw [Hasse_Minkowski]
@@ -196,15 +210,42 @@ theorem Hasse_Minkowski0 (hV : Module.rank ℚ V = 0) : ∀ (F : QuadraticForm �
      rw [← base_change_module_rank_preserved, hV] 
 
 
+-- General lemma for all cases of dimension at least 1:
+
+-- The quadratic form 0 on a vector space of dimension greater than zero is isotropic. 
+lemma isotropic_of_zero_quadForm_dim_ge1 [Module k W] (Q : QuadraticForm k W) (h₁ : Q=0) 
+(h₂ : Module.rank k W ≠ 0) : Q.Isotropic := by
+  rw [QuadraticForm.Isotropic]
+  rw [QuadraticForm.Anisotropic]
+  have h: ∃ (w : W), w ≠ 0 := by
+    simpa [rank_zero_iff_forall_zero] using h₂
+  obtain ⟨w, hw⟩ := h 
+  have : Q w = 0 := by 
+    rw [h₁]
+    simp
+  tauto
+
+
 -- (1) dim(V)=1 case
 
 -- Every non-zero quadratic form on a vector space of dimension 1 is anisotropic. 
 lemma anisotropic_of_nonzero_quadForm_dim_1 [Module k W] (Q : QuadraticForm k W) 
-(h₁ : Q ≠ 0) (h₂ : Module.rank k W = 1) : Q.Anisotropic := sorry
+(h₁ : Q ≠ 0) (h₂ : Module.rank k W = 1) : Q.Anisotropic := by
+  rw [QuadraticForm.Anisotropic]
+  have h: ∃ (w : W), Q w ≠ 0 := by sorry -- using h₁
+  obtain ⟨w, hw⟩ := h   
+  have h': ∀ (v : W) (h'': v ≠ 0), Q v ≠ 0 := by sorry -- using h₂: v = a*w, Q v = a^2*Q w ≠ 0
+  intro 
+  contrapose
+  apply h'     
 
+
+-- Proof of Hasse Minkowski in dimension 1. 
 theorem Hasse_Minkowski1 (hV : Module.rank V = 1) :
     ∀ (F : QuadraticForm ℚ V), Hasse_Minkowski F := sorry
 
+
+-- Some general lemmas for all cases of dimension at least 2:
 
 lemma HM_of_Equivalent {Q S : QuadraticForm ℚ V} (h : Q.Equivalent S) :
     Q.Hasse_Minkowski ↔ S.Hasse_Minkowski := by
@@ -223,3 +264,4 @@ lemma rat_sq_iff_local_sq (x : ℚ) : IsSquare x ↔ (∀ (p : ℕ) [Fact (p.Pri
 theorem Hasse_Minkowski2 (hV : Module.rank V = 2) :
     ∀ (F : QuadraticForm ℚ V), Hasse_Minkowski F := sorry
 
+--#lint
