@@ -149,6 +149,24 @@ lemma Isotropic_of_zero_quadForm_dim_ge1 [Module k W] (Q : QuadraticForm k W) (h
     simp only [zero_apply]
   tauto
 
+-- the easy direction
+theorem QuadraticForm.global_to_local (F : QuadraticForm ℚ V) : F.Isotropic → F.EverywhereLocallyIsotropic := by
+  simp only [Isotropic, Anisotropic, not_forall, exists_prop, EverywhereLocallyIsotropic, forall_exists_index, and_imp]
+  intro x Fx0 xn0
+  constructor
+  · intro p hp
+    use ((1 : ℚ_[p]) ⊗ₜ x)
+    constructor
+    · rw [F.baseChange_eval ℚ_[p] x, Fx0]
+      simp only [mul_one, _root_.map_zero, mul_zero]
+    sorry -- todo: base change of non-zero to ℚ_[p] is non-zero
+  use ((1 : ℝ) ⊗ₜ x)
+  constructor
+  · rw [F.baseChange_eval ℝ x, Fx0]
+    simp only [mul_one, _root_.map_zero, mul_zero]
+  sorry -- todo: base change of non-zero to ℝ is non-zero
+
+
 -- (0) dim(V)=0 case
 
 -- Every quadratic form on a zero-dimensional vector space is anisotropic. 
@@ -205,4 +223,3 @@ lemma rat_sq_iff_local_sq (x : ℚ) : IsSquare x ↔ (∀ (p : ℕ) [Fact (p.Pri
 theorem Hasse_Minkowski2 (hV : Module.rank V = 2) :
     ∀ (F : QuadraticForm ℚ V), Hasse_Minkowski F := sorry
 
-#lint
