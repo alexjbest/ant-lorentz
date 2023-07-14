@@ -277,7 +277,7 @@ open TensorProduct -- for notation
 
 noncomputable
 def _root_.Basis.base_change (h : Basis ι k M) : Basis ι A (A ⊗[k] M) :=
-Algebra.TensorProduct.basis A h
+Algebra.TensorProduct.basis A h -- needs a mathlib change for this to work!
 
 lemma base_change_module_rank_preserved : Module.rank k M = Module.rank A (A ⊗[k] M) := by 
   obtain ⟨⟨_, bM⟩⟩ := Module.Free.exists_basis (R := k) (M := M)
