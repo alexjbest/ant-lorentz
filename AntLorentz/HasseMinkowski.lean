@@ -216,11 +216,13 @@ theorem ex (Q : QuadraticForm ℚ V) (h : FiniteDimensional.finrank ℚ V = 2) :
     
   -- (2) dim(V)=2 case
 
+/- not needed any more
 lemma rat_sq_iff_local_sq (x : ℚ) : IsSquare x ↔ (∀ (p : ℕ) [Fact (p.Prime)], IsSquare (x : ℚ_[p])) ∧ IsSquare (x : ℝ) := by
   sorry 
+-/
 
-theorem HasseMinkowski2 (hV : Module.rank V = 2) :
-    ∀ (F : QuadraticForm ℚ V), HasseMinkowski F := sorry
+theorem HasseMinkowski2 (hV : FiniteDimensional.finrank ℚ V = 2) (F : QuadraticForm ℚ V) : HasseMinkowski F := sorry
+
 
 --#lint -- TODO should ignore unfinished
 
@@ -229,7 +231,7 @@ lemma HasseMinkowski_proof_finite [Module.Finite ℚ V] (F : QuadraticForm ℚ V
   match h : FiniteDimensional.finrank ℚ V with
   | 0       => sorry
   | 1       => sorry
-  | 2       => sorry
+  | 2       => exact HasseMinkowski2 h F
   | 3       => sorry
   | 4       => sorry
   | (n + 5) => sorry

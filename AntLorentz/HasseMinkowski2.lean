@@ -245,13 +245,11 @@ theorem ex (Q : QuadraticForm ℚ V) (h : FiniteDimensional.finrank ℚ V = 2)
   -- simp at *
   simp [hw1]
 
-end QuadraticForm
+/-end QuadraticForm
 -- (2) dim(V)=2 case
 
--- not needed any more
---lemma rat_sq_iff_local_sq (x : ℚ) : IsSquare x ↔ (∀ (p : ℕ) [Fact (p.Prime)], IsSquare (x : ℚ_[p])) ∧ IsSquare (x : ℝ) := by
---  sorry
-
+-- duplicate of theorem from HasseMinkowski.lean
 theorem Hasse_Minkowski2 (hV : Module.rank V = 2) (F : QuadraticForm ℚ V) : F.Hasse_Minkowski := sorry
+-/
 
 --#lint
