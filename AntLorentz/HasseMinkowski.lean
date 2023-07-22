@@ -160,11 +160,11 @@ lemma isotropic_of_zero_quadForm_dim_ge1 [Module k W] (Q : QuadraticForm k W) (h
   rw [QuadraticForm.Isotropic]
   rw [QuadraticForm.Anisotropic]
   have h: ∃ (w : W), w ≠ 0 := by
-    simpa [rank_zero_iff_forall_zero] using h₂
+    simpa only [ne_eq, rank_zero_iff_forall_zero, not_forall] using h₂
   obtain ⟨w, hw⟩ := h 
   have : Q w = 0 := by 
     rw [h₁]
-    simp
+    simp only [zero_apply]
   tauto
 
 
@@ -221,7 +221,26 @@ lemma rat_sq_iff_local_sq (x : ℚ) : IsSquare x ↔ (∀ (p : ℕ) [Fact (p.Pri
   sorry 
 -/
 
-theorem HasseMinkowski2 (hV : FiniteDimensional.finrank ℚ V = 2) (F : QuadraticForm ℚ V) : HasseMinkowski F := sorry
+theorem HasseMinkowski2 (hV : FiniteDimensional.finrank ℚ V = 2) (F : QuadraticForm ℚ V) : HasseMinkowski F := by
+  by_cases hF : (associated (R₁ := ℚ) F).Nondegenerate
+  · have hV0 : 0 < FiniteDimensional.finrank ℚ V := by rw [hV]; norm_num
+    obtain ⟨w, hw1, hw0, hEF⟩ := equivalent_weightedSumSquares_units_of_nondegenerate'' F hV0 hV.symm hF
+    rw [HasseMinkowski_of_Equivalent (V := V) hEF, HasseMinkowski]
+    constructor
+    · intro h
+      exact HasseMinkowski_global_to_local _ h
+    · intro hl
+      by_cases hw : w ⟨1, (by norm_num)⟩ = -1
+      · rw [Isotropic, Anisotropic]
+        push_neg
+        sorry -- use (1,1)
+      · exfalso
+        rw [EverywhereLocallyIsotropic, Isotropic, Anisotropic] at hl
+        let a := w 1
+        have ha : Squarefree a := hw0 1
+        rcases hl with ⟨hlf, hli⟩
+        sorry -- get a contradiction: a prime dividing a will contradict hlf, positivity of a will contradict hli
+  · exact HasseMinkowski_of_degenerate F hF
 
 
 --#lint -- TODO should ignore unfinished
@@ -258,7 +277,6 @@ lemma HasseMinkowski_proof_infinite (h : ¬ Module.Finite ℚ V) (F : QuadraticF
   sorry
 
 theorem HasseMinkowski_proof (F : QuadraticForm ℚ V) : F.HasseMinkowski := by
-  have finite_or_not := em (Module.Finite ℚ V)
-  cases finite_or_not with
+  cases em (Module.Finite ℚ V) with
   | inl finite   => exact HasseMinkowski_proof_finite F
   | inr infinite => exact HasseMinkowski_proof_infinite infinite F
