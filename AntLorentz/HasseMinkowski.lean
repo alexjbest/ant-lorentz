@@ -78,22 +78,6 @@ def EverywhereLocallyIsotropic :=
 def HasseMinkowski (F : QuadraticForm ℚ V) : Prop :=
   F.Isotropic ↔ F.EverywhereLocallyIsotropic
 
-theorem HasseMinkowski_easy_way [Module.Finite ℚ V] (F : QuadraticForm ℚ V) (h : F.Isotropic) :
-    F.EverywhereLocallyIsotropic := by
-  rw [EverywhereLocallyIsotropic]
-  simp only [Isotropic, Anisotropic, not_forall, exists_prop] at h ⊢ 
-  push_neg at h
-  obtain ⟨x, hx, hne⟩ := h
-  constructor
-  . intro p hp
-    use (1 ⊗ₜ x)
-    simp [hx]
-    sorry
-  . use (1 ⊗ₜ x)
-    simp [hx]
-    sorry
-
-
 
 -- General dimension
 
@@ -112,21 +96,21 @@ lemma Isotropic_of_zero_quadForm_dim_ge1 [Module k W] (Q : QuadraticForm k W) (h
   tauto
 
 -- the easy direction
-theorem QuadraticForm.global_to_local (F : QuadraticForm ℚ V) : F.Isotropic → F.EverywhereLocallyIsotropic := by
-  simp only [Isotropic, Anisotropic, not_forall, exists_prop, EverywhereLocallyIsotropic, forall_exists_index, and_imp]
-  intro x Fx0 xn0
+theorem HasseMinkowski_global_to_local (F : QuadraticForm ℚ V) (h : F.Isotropic) :
+    F.EverywhereLocallyIsotropic := by
+  rw [EverywhereLocallyIsotropic]
+  simp only [Isotropic, Anisotropic, not_forall, exists_prop] at h ⊢ 
+  push_neg at h
+  obtain ⟨x, hx, hne⟩ := h
   constructor
-  · intro p hp
-    use ((1 : ℚ_[p]) ⊗ₜ x)
-    constructor
-    · rw [F.baseChange_eval ℚ_[p] x, Fx0]
-      simp only [mul_one, _root_.map_zero, mul_zero]
-    sorry -- todo: base change of non-zero to ℚ_[p] is non-zero
-  use ((1 : ℝ) ⊗ₜ x)
-  constructor
-  · rw [F.baseChange_eval ℝ x, Fx0]
-    simp only [mul_one, _root_.map_zero, mul_zero]
-  sorry -- todo: base change of non-zero to ℝ is non-zero
+  . intro p hp
+    use (1 ⊗ₜ x)
+    simp only [baseChange_eval, mul_one, hx, _root_.map_zero, mul_zero, true_and]
+    sorry
+  . use (1 ⊗ₜ x)
+    simp only [baseChange_eval, mul_one, hx, _root_.map_zero, mul_zero, true_and]
+    sorry
+
 
 -- using equivalent forms
 lemma HasseMinkowski_of_Equivalent {Q : QuadraticForm ℚ V} {S : QuadraticForm ℚ V₂}
@@ -176,11 +160,11 @@ lemma isotropic_of_zero_quadForm_dim_ge1 [Module k W] (Q : QuadraticForm k W) (h
   rw [QuadraticForm.Isotropic]
   rw [QuadraticForm.Anisotropic]
   have h: ∃ (w : W), w ≠ 0 := by
-    simpa [rank_zero_iff_forall_zero] using h₂
+    simpa only [ne_eq, rank_zero_iff_forall_zero, not_forall] using h₂
   obtain ⟨w, hw⟩ := h 
   have : Q w = 0 := by 
     rw [h₁]
-    simp
+    simp only [zero_apply]
   tauto
 
 
@@ -232,20 +216,67 @@ theorem ex (Q : QuadraticForm ℚ V) (h : FiniteDimensional.finrank ℚ V = 2) :
     
   -- (2) dim(V)=2 case
 
+/- not needed any more
 lemma rat_sq_iff_local_sq (x : ℚ) : IsSquare x ↔ (∀ (p : ℕ) [Fact (p.Prime)], IsSquare (x : ℚ_[p])) ∧ IsSquare (x : ℝ) := by
   sorry 
+-/
 
-theorem HasseMinkowski2 (hV : Module.rank V = 2) :
-    ∀ (F : QuadraticForm ℚ V), HasseMinkowski F := sorry
+theorem HasseMinkowski2 (hV : FiniteDimensional.finrank ℚ V = 2) (F : QuadraticForm ℚ V) : HasseMinkowski F := by
+  by_cases hF : (associated (R₁ := ℚ) F).Nondegenerate
+  · have hV0 : 0 < FiniteDimensional.finrank ℚ V := by rw [hV]; norm_num
+    obtain ⟨w, hw1, hw0, hEF⟩ := equivalent_weightedSumSquares_units_of_nondegenerate'' F hV0 hV.symm hF
+    rw [HasseMinkowski_of_Equivalent (V := V) hEF, HasseMinkowski]
+    constructor
+    · intro h
+      exact HasseMinkowski_global_to_local _ h
+    · intro hl
+      by_cases hw : w ⟨1, (by norm_num)⟩ = -1
+      · rw [Isotropic, Anisotropic]
+        push_neg
+        sorry -- use (1,1)
+      · exfalso
+        rw [EverywhereLocallyIsotropic, Isotropic, Anisotropic] at hl
+        let a := w 1
+        have ha : Squarefree a := hw0 1
+        rcases hl with ⟨hlf, hli⟩
+        sorry -- get a contradiction: a prime dividing a will contradict hlf, positivity of a will contradict hli
+  · exact HasseMinkowski_of_degenerate F hF
 
-#lint -- TODO should ignore unfinished
+
+--#lint -- TODO should ignore unfinished
 
 -- a nontrivial project (probably publishable if someone does it)
-theorem HasseMinkowski_proof [Module.Finite ℚ V] (F : QuadraticForm ℚ V) : F.HasseMinkowski := by
+lemma HasseMinkowski_proof_finite [Module.Finite ℚ V] (F : QuadraticForm ℚ V) : F.HasseMinkowski := by
   match h : FiniteDimensional.finrank ℚ V with
   | 0       => sorry
   | 1       => sorry
-  | 2       => sorry
+  | 2       => exact HasseMinkowski2 h F
   | 3       => sorry
   | 4       => sorry
   | (n + 5) => sorry
+
+lemma HasseMinkowski_proof_infinite (h : ¬ Module.Finite ℚ V) (F : QuadraticForm ℚ V) : F.HasseMinkowski := by
+  /- Kevin's idea (if I understood correctly):
+     Suppose that V is of dimension >= 3 and F is everywhere locally
+     soluble.
+     1. Let W₀ ⊆ V be of dimension 3. Then F restricted to W₀ is
+     locally soluble at all but finitely many places.
+     Indeed, choose a basis such that F
+     is given by an integral quadratic polynomial on W₀. It has
+     solutions modulo every prime by Chevalley-Warning. For
+     primes not dividing the discriminant, these solutions can
+     be lifted to local solutions.
+     2. For the finitely many remaining places p, choose solutions
+     v_p in ℚ_p ⊗ V. They are finite sums of pure sensors
+     v_p = y_{p,1} ⊗ v_{p,1} + ... + y_{p,n} ⊗ v_{p,n}.
+     3. Let W be the span of W₀ ∪ {v_{p,i} : p, i}, which is
+     finite-dimensional. Then F restricted to W is everywhere locally
+     soluble, hence by finite-dimensional Hasse-Minkowski
+     we get that F has a solution in W ⊂ V. 
+  -/
+  sorry
+
+theorem HasseMinkowski_proof (F : QuadraticForm ℚ V) : F.HasseMinkowski := by
+  cases em (Module.Finite ℚ V) with
+  | inl finite   => exact HasseMinkowski_proof_finite F
+  | inr infinite => exact HasseMinkowski_proof_infinite infinite F

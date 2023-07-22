@@ -67,6 +67,7 @@ open TensorProduct -- this line gives us access to ⊗ notation
 -- Let's be lazy and assume 1/2 ∈ R
 variable [Invertible (2 : R)]
 
+/- already defined in BaseChange.lean
 def ten {R A M N} [CommRing R] [Ring A] [Algebra R A] [AddCommMonoid M] [AddCommMonoid N]
   [Module R M] [Module A M]
   [Module R N] [Module A N]
@@ -114,7 +115,6 @@ lemma LinearEquiv.baseChange_apply {R A M N} [CommRing R] [Ring A] [Algebra R A]
   ((f.baseChange : A ⊗[R] M ≃ₗ[A] A ⊗[R] N) : _ → _) (a ⊗ₜ[R] v) = (a ⊗ₜ f v) := rfl
 
 
-
 lemma QuadraticForm.baseChange.Equivalent
   (A : Type _) [CommRing A] [Algebra R A]
   (Q S : QuadraticForm R M) (h : Q.Equivalent S) :
@@ -133,7 +133,7 @@ lemma QuadraticForm.baseChange.Equivalent
     rw [hB] at *
     simp [*]
 
-
+-/
 
 end base_change
 
@@ -245,13 +245,11 @@ theorem ex (Q : QuadraticForm ℚ V) (h : FiniteDimensional.finrank ℚ V = 2)
   -- simp at *
   simp [hw1]
 
-end
+/-end QuadraticForm
 -- (2) dim(V)=2 case
 
-lemma rat_sq_iff_local_sq (x : ℚ) : IsSquare x ↔ (∀ (p : ℕ) [Fact (p.Prime)], IsSquare (x : ℚ_[p])) ∧ IsSquare (x : ℝ) := by
-  sorry
+-- duplicate of theorem from HasseMinkowski.lean
+theorem Hasse_Minkowski2 (hV : Module.rank V = 2) (F : QuadraticForm ℚ V) : F.Hasse_Minkowski := sorry
+-/
 
-theorem Hasse_Minkowski2 (hV : Module.rank V = 2) :
-    ∀ (F : QuadraticForm ℚ V), Hasse_Minkowski F := sorry
-
-#lint
+--#lint

@@ -215,7 +215,7 @@ lemma LinearMap.baseChange_id {R A M} [CommRing R] [Ring A] [Algebra R A]
   [Module R M] :
   LinearMap.baseChange A LinearMap.id (R := R) = LinearMap.id (M := A ⊗[R] M) := by
   ext
-  simp
+  simp only [AlgebraTensorModule.curry_apply, curry_apply, coe_restrictScalars, baseChange_tmul, id_coe, id_eq]
 
 
 @[simp]
