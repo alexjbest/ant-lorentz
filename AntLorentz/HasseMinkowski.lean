@@ -5,6 +5,10 @@ import Mathlib.LinearAlgebra.Dimension -- rank of modules
 import Mathlib.NumberTheory.Padics.PadicNumbers
 import AntLorentz.Diagonalize
 import AntLorentz.BaseChange
+import Mathlib.Data.Int.Basic
+import Mathlib.Data.Nat.Factorization.Basic
+import Mathlib.Data.Nat.Prime
+import Mathlib.Algebra.Squarefree
 
 --import Lean
 --open Lean Elab Tactic
@@ -221,6 +225,10 @@ lemma rat_sq_iff_local_sq (x : ℚ) : IsSquare x ↔ (∀ (p : ℕ) [Fact (p.Pri
   sorry 
 -/
 
+open Int
+
+
+
 theorem HasseMinkowski2 (hV : FiniteDimensional.finrank ℚ V = 2) (F : QuadraticForm ℚ V) : HasseMinkowski F := by
   by_cases hF : (associated (R₁ := ℚ) F).Nondegenerate
   · have hV0 : 0 < FiniteDimensional.finrank ℚ V := by rw [hV]; norm_num
@@ -239,7 +247,17 @@ theorem HasseMinkowski2 (hV : FiniteDimensional.finrank ℚ V = 2) (F : Quadrati
         let a := w 1
         have ha : Squarefree a := hw0 1
         rcases hl with ⟨hlf, hli⟩
-        sorry -- get a contradiction: a prime dividing a will contradict hlf, positivity of a will contradict hli
+        cases lt_or_gt_of_ne (Squarefree.ne_zero ha) with
+        | inl hneg => {
+            let n := a.natAbs
+            have ngt1 : n > 1 := by sorry -- combine hw with hneg
+            rw [← squarefree_natAbs] at ha
+            
+            sorry -- get contradiction with hlf
+          }
+        | inr hpos => {
+            sorry -- get contradiction with hli
+        }
   · exact HasseMinkowski_of_degenerate F hF
 
 
