@@ -227,7 +227,9 @@ lemma rat_sq_iff_local_sq (x : ℚ) : IsSquare x ↔ (∀ (p : ℕ) [Fact (p.Pri
 
 open Int
 
-
+-- TODO: make this more general
+theorem weightedSumSquares_basechange_anisotropic_iff {a : ℕ} {p : ℕ} (w : Fin a → ℤ) [hp : Fact p.Prime] : ((weightedSumSquares ℚ w).baseChange ℚ_[p]).Anisotropic ↔ (weightedSumSquares ℚ_[p] (fun i => (w i : ℚ_[p]))).Anisotropic := by
+  sorry
 
 theorem HasseMinkowski2 (hV : FiniteDimensional.finrank ℚ V = 2) (F : QuadraticForm ℚ V) : HasseMinkowski F := by
   by_cases hF : (associated (R₁ := ℚ) F).Nondegenerate
@@ -252,8 +254,27 @@ theorem HasseMinkowski2 (hV : FiniteDimensional.finrank ℚ V = 2) (F : Quadrati
             let n := a.natAbs
             have ngt1 : n > 1 := by sorry -- combine hw with hneg
             rw [← squarefree_natAbs] at ha
-            
-            sorry -- get contradiction with hlf
+            let f := n.factors
+            by_cases hf : f = []
+            · have : n = 1 := by 
+                sorry
+              sorry -- now we have a = -1 after all
+            · have hp := List.exists_mem_of_ne_nil f hf
+              rcases hp with ⟨p, hp⟩
+              have hp2 := Nat.prime_of_mem_factors hp 
+              have : Fact (p.Prime) := by exact { out := hp2 }
+              specialize hlf p
+              rw [Isotropic, weightedSumSquares_basechange_anisotropic_iff w, Anisotropic] at hlf
+              push_neg at hlf
+              rcases hlf with ⟨x, ⟨ hx1, hx2⟩ ⟩
+              simp only [weightedSumSquares_apply, smul_eq_mul, Fin.sum_univ_two] at hx1 
+              by_cases hx3 : x 0 = 0
+              · have : x = 0 := by
+                  simp?
+                  sorry
+                exact hx2 this
+              · have : (w 1 : ℚ_[p]) * (x 1 * x 1) = -(x 0 * x 0) := by sorry -- use hw1 and hx1
+                sorry -- contradiction with square-freeness and the choice of p
           }
         | inr hpos => {
             sorry -- get contradiction with hli
