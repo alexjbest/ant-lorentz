@@ -178,7 +178,9 @@ lemma isotropic_of_zero_quadForm_dim_ge1 [Module k W] (Q : QuadraticForm k W) (h
 lemma anisotropic_of_nonzero_quadForm_dim_1 [Module k W] (Q : QuadraticForm k W) 
     (h₁ : Q ≠ 0) (h₂ : Module.rank k W = 1) : Q.Anisotropic := by
   rw [QuadraticForm.Anisotropic]
-  have h: ∃ (w : W), Q w ≠ 0 := by sorry -- using h₁
+  have h: ∃ (w : W), Q w ≠ 0 := by
+   rw [ne_eq, ext_iff,not_forall] at h₁
+   convert h₁
   obtain ⟨w, hw⟩ := h   
   have h': ∀ (v : W) (h'': v ≠ 0), Q v ≠ 0 := by sorry -- using h₂: v = a*w, Q v = a^2*Q w ≠ 0
   intro 
