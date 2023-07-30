@@ -107,13 +107,6 @@ lemma ext {G : Type _} [Group G] [Fintype G] [IsCyclic G]
   subst hGcard
   simpa [ZMod.nat_cast_val, ZMod.cast_id'] using h
 
--- This should not be in this file.
-lemma subsingleton_of_card_eq_one {X : Type _} [Fintype X] (h : Fintype.card X = 1) :
-    Subsingleton X := by
-  rw [Fintype.card_eq_one_iff_nonempty_unique] at h
-  cases h
-  infer_instance
-
 lemma id : χ n (RingEquiv.refl L) = 1 := by
   refine ext (G := rootsOfUnity n L) rfl ?_
   intro ζ
@@ -123,7 +116,7 @@ lemma id : χ n (RingEquiv.refl L) = 1 := by
   obtain (h | h) := this.lt_or_eq
   · have := Fact.mk h
     simp [ZMod.val_one]
-  · have := subsingleton_of_card_eq_one h.symm
+  · have := Fintype.card_le_one_iff_subsingleton.mp h.ge
     obtain rfl : ζ = 1 := by apply Subsingleton.elim
     simp
 
